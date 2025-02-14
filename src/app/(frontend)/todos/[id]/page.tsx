@@ -2,9 +2,11 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import Image from 'next/image'
 import { Media } from '@/payload-types'
-import { headers } from 'next/headers'
 
-export default async function TodoPage({ params }: { params: { id: string } }) {
+interface TodoPageProps {
+  params: { id: string }
+}
+export default async function TodoPage({ params }: TodoPageProps) {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
