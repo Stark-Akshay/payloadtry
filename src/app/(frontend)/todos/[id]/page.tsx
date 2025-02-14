@@ -3,19 +3,18 @@ import config from '@/payload.config'
 import Image from 'next/image'
 import { Media } from '@/payload-types'
 
-interface TodoPageProps {
-  params: { id: string }
-}
-export default async function TodoPage({ params }: TodoPageProps) {
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-
-  const todoID = params.id
+export default async function TodoPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params // Await `params` in case it’s a Promise
+  const payload = await getPayload({ config: await config })
 
   const todo = await payload.findByID({
     collection: 'todos',
-    id: todoID,
+    id: resolvedParams.id,
   })
+
+  if (!todo) {
+    return <p>Todo not found.</p>
+  }
 
   const { title, description, completed, createdAt, updatedAt, media } = todo
   const mediaData = media as Media | null
@@ -26,8 +25,8 @@ export default async function TodoPage({ params }: TodoPageProps) {
       <p>{title}</p>
       <p>{description}</p>
       <p>{completed ? 'Completed' : 'Not Completed'}</p>
-      <p>{createdAt}</p>
-      <p>{updatedAt}</p>
+      <p>{new Date(createdAt).toLocaleString()}</p>
+      <p>{new Date(updatedAt).toLocaleString()}</p>
       {mediaData?.url && (
         <Image
           src={mediaData.url}
